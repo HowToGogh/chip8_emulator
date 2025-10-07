@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #ifndef PARAMETERS
 #define PARAMETERS
@@ -20,6 +21,15 @@ extern uint8_t fonts[80];
 typedef struct display_t {
     char monitor[DISPLAY_HEIGHT][DISPLAY_WIDTH];
 } display_t;
+
+typedef struct button_t {
+    char key;
+    bool pressed;
+} button_t;
+
+typedef struct keyboard_t {
+    button_t keys[16];
+} keyboard_t;
 
 typedef struct cpu_t {        
     uint16_t PC;                // Program Counter - points to the NEXT program
