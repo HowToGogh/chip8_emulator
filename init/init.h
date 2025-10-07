@@ -6,9 +6,12 @@
 #include "../types/types.h"
 
 void
-cpu_init(struct cpu_t* cpu);
+cpu_init(cpu_t* cpu);
 
 void 
-display_init(struct display_t* display);
+display_init(display_t* display);
+
+void
+keyboard_init(keyboard_t* keyboard);
 
 #endif

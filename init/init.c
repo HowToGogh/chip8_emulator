@@ -47,3 +47,13 @@ cpu_init(cpu_t* cpu) {
     memcpy(cpu->memory, fonts, 80);
 
 }
+
+void
+keyboard_init(keyboard_t* keyboard) {
+    for (int i = 0; i < 10; ++i) {
+        keyboard->keys[i].key = (char)(48 + i);
+    }
+    for (int i = 0; i < 6; ++i) {
+        keyboard->keys[i + 10].key = (char)(65 + i);
+    }
+}
