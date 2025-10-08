@@ -4,11 +4,11 @@
 #include "types/types.h"
 #include "init/init.h"
 
-int main() {
+display_t Display;
+cpu_t CPU;
+keyboard_t Keyboard;
 
-    display_t Display;
-    cpu_t CPU;
-    keyboard_t Keyboard;
+int main() {
     
     display_init(&Display);
     cpu_init(&CPU);
