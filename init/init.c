@@ -52,8 +52,10 @@ void
 keyboard_init(keyboard_t* keyboard) {
     for (int i = 0; i < 10; ++i) {
         keyboard->keys[i].key = (char)(48 + i);
+        keyboard->keys[i].pressed = false;
     }
     for (int i = 0; i < 6; ++i) {
         keyboard->keys[i + 10].key = (char)(65 + i);
+        keyboard->keys[i + 10].pressed = false;
     }
 }
