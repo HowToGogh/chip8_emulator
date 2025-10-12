@@ -3,6 +3,30 @@
 #include <../types/types.h>
 
 
+#ifndef OPERATION_TYPE_T
+#define OPERATION_TYPE_T
+
+
+typedef enum op_type_t {
+    IMMEDIATE, // Value to register        
+    STRAIGHT, // Register to register         
+    SET_INDEX, // Value to index register      
+    DELAY_TIMER, // Delay timer to register      
+    KEY_PRESSED, // Key pressed to register      
+    SET_DELAY_TIMER, // Register to delay timer  
+    SET_SOUND_TIMER, // Register to sound timer
+    FONT, // Register to font             
+    BCD, // Split register to decimals              
+    REGISTER_TO_ARRAY, // Set n registers to n index registers
+    ARRAY_TO_REGISTER, // Set n index registers to n registers
+    BUTTON_PRESSED,
+    BUTTON_NOT_PRESSED
+} op_type_t;
+
+
+#endif
+
+
 #ifndef SYSCALLS_H
 #define SYSCALLS_H
 
@@ -17,7 +41,7 @@ PC = nnn + v0, Jump to PC
 Tip: PC = address[0] + address[1]
 */
 void
-JMP(uint16_t address[2]);
+JMP(cpu_t* cpu, uint16_t address[2], op_type_t type);
 
 
 
@@ -26,8 +50,7 @@ JMP(uint16_t address[2]);
 Call coroutine on 0xnnn address.
 */
 void
-CALL(uint16_t coroutine);
-
+CALL(cpu_t* cpu, uint16_t coroutine);
 
 
 /*
@@ -39,8 +62,8 @@ Skip next instruction, if Vx == Vy.
 
 Tip: Skip if Equal
 */
-bool
-SE(uint8_t val1, uint8_t val2);
+void
+SE(cpu_t* cpu, uint8_t Vx, uint8_t val2, op_type_t type);
 
 
 
@@ -53,29 +76,28 @@ Skip next instruction if Vx != Vy.
 
 Tip: Skip if NOT Equal
 */
-bool
-SNE(uint8_t val1, uint8_t val2);
+void
+SNE(cpu_t* cpu, uint8_t val1, uint8_t val2, op_type_t type);
 
 
 
 /*
 0x6xkk - LOAD Vx, kk
-0x8xy0 - LOAD Vx, Vy
+0x8xy0 - LOAD Vx, Vy 
 0xAnnn - LOAD I, nnn
-0xFx07 - LOAD Vx, DT
+0xFx07 - LOAD Vx, DT  
 0xFx0A - LOAD Vx, Key
-0xFx15 - LOAD DT, Vx
-0xFx18 - LOAD ST, Vx
-0xFx29 - LOAD Font, Vx
-0xFx33 - LOAD BCD, Vx
-0xFx55 - LOAD [I], Vx
-0xFx65 - LOAD Vx, [I]
+0xFx15 - LOAD DT, Vx 
+0xFx18 - LOAD ST, Vx  
+0xFx29 - LOAD Font, Vx 
+0xFx33 - LOAD BCD, Vx   
+0xFx55 - LOAD [I], Vx   
+0xFx65 - LOAD Vx, [I]   
 
 Tip: to = from
 */
 void
-LOAD(uint8_t to, uint8_t from);
-
+LOAD(cpu_t* cpu, uint16_t to, uint16_t from, op_type_t type);
 
 
 /*
@@ -86,7 +108,7 @@ LOAD(uint8_t to, uint8_t from);
 Tip: val1 += val2
 */
 void
-ADD(uint8_t val1, uint8_t val2);
+ADD(cpu_t* cpu, uint8_t val1, uint8_t val2, op_type_t type);
 
 
 
@@ -96,7 +118,7 @@ ADD(uint8_t val1, uint8_t val2);
 Tip: val1 -= val2
 */
 void
-SUB(uint8_t val1, uint8_t val2);
+SUB(cpu_t* cpu, uint8_t val1, uint8_t val2);
 
 
 
@@ -106,7 +128,7 @@ SUB(uint8_t val1, uint8_t val2);
 Tip: val1 = val2 - val1
 */
 void
-SUBN(uint8_t val1, uint8_t val2);
+SUBN(cpu_t* cpu, uint8_t val1, uint8_t val2);
 
 
 
@@ -116,17 +138,17 @@ SUBN(uint8_t val1, uint8_t val2);
 Tip: val1 |= val2
 */
 void
-OR(uint8_t val1, uint8_t val2);
+OR(cpu_t* cpu, uint8_t val1, uint8_t val2);
 
 
 
 /*
-0x8xy2 - OR Vx, Vy
+0x8xy2 - AND Vx, Vy
 
 Tip: val1 &= val2
 */
 void
-AND(uint8_t val1, uint8_t val2);
+AND(cpu_t* cpu, uint8_t val1, uint8_t val2);
 
 
 
@@ -136,7 +158,7 @@ AND(uint8_t val1, uint8_t val2);
 Tip: val1 ^= val2
 */
 void
-XOR(uint8_t val1, uint8_t val2);
+XOR(cpu_t* cpu, uint8_t val1, uint8_t val2);
 
 
 
@@ -146,7 +168,7 @@ XOR(uint8_t val1, uint8_t val2);
 Tip: vF = vx & 1, vx >>= 1
 */
 void
-SHR(uint8_t register);
+SHR(cpu_t* cpu, uint8_t val1);
 
 
 
@@ -156,17 +178,17 @@ SHR(uint8_t register);
 Tip: vF = vx & 0x80, vx <<= 1
 */
 void
-SHL(uint8_t register);
+SHL(cpu_t* cpu, uint8_t register);
 
 
 
 /*
 0xCxkk - RND Vx, kk
 
-Tip: register = random() & kk
+Tip: Vx = random() & kk
 */
 void
-RND(uint8_t register, uint8_t val);
+RND(cpu_t* cpu, uint8_t Vx, uint8_t val);
 
 
 
@@ -189,6 +211,7 @@ Skip instruction if key with code in Vx IS PRESSED.
 Skip instruction if key with code in Vx IS NOT PRESSED.
 */
 bool
-SKP(button_t button);
+SKP(cpu_t* cpu, button_t button, op_type_t type);
+
 
 #endif
